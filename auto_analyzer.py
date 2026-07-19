@@ -1394,6 +1394,12 @@ def generate_html_dashboard(excel_path, store_name):
     with open(output_html_path, "w", encoding="utf-8") as f:
         f.write(html_template)
     print(f"HTML Interactive Dashboard generated successfully: {output_html_path}")
+    
+    # Also save as index.html for root page on GitHub Pages
+    index_html_path = os.path.join(os.path.dirname(excel_path), "index.html")
+    with open(index_html_path, "w", encoding="utf-8") as f:
+        f.write(html_template)
+    print(f"HTML index.html generated successfully for GitHub Pages.")
 
 def deploy_to_github():
     """
@@ -1407,7 +1413,7 @@ def deploy_to_github():
             return
             
         # Add generated html and rich summaries
-        os.system("git add 分析ダッシュボード_*.html data_input/ai_summaries_rich.json")
+        os.system("git add 分析ダッシュボード_*.html index.html data_input/ai_summaries_rich.json")
         
         # Commit changes
         commit_msg = f"Auto-update dashboard: {datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')}"
