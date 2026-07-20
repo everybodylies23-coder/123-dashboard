@@ -1,14 +1,9 @@
 {
   "GEMINI_API_KEY": "AQ.Ab8RN6I2vmTFRi0_SJrnFJYz4rkFT6TqR6ZDu5MzsscQfEQFMg",
   "STORES": {
-    "スタジアム": {
-      "excel_file": "スタジアム_データ.xlsx"
-    },
-    "B店": {
-      "excel_file": "B店_データ.xlsx"
-    },
-    "C店": {
-      "excel_file": "C店_データ.xlsx"
+    "123": {
+      "excel_file": "123_データ.xlsx",
+      "has_diff_coins": false
     }
   }
 }
