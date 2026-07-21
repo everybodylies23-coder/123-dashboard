@@ -1,0 +1,43 @@
+
+var ftGUID_7986393="67181BA99F7BB8";
+var ftConfID_7986393="0";
+var ftParams_7986393="ft_custom=wbR_INuQeii8lRB_-OEsZdqwATzIg8wGCcU=&ftOBA=1&ft_agentEnv=0&ft_referrer=https%3A%2F%2Fgoogleads.g.doubleclick.net%2Fpagead%2Fhtml%2Fr20260720%2Fr20190131%2Fzrt_lookup_fy2021.html%23RS-1-%26adk%3D1812271801%26client%3Dca-pub-8934993653059501%26fa%3D1%26ifi%3D8%26uci%3Da!8%26btvi%3D2&gdpr=0&ftClick=https://adclick.g.doubleclick.net/aclk?sa=L&ai=CpjMAiQxfarzBDf-CjeYP2ZzJkAKI76j0XN69t5avAcCNtwEQASDSrfuEAWCJg8iE-BPIAQmoAwHIAwKqBK8CT9BtaFhRyYrJ8DcETGhdKoO4D6xPK3cNHWFfhjDClwwrxQxDjMbhXhoiWoHPd_ITm4MdxgY-fibr4JwVlvgqfqJ9eYCSQwiMyd4M76TwAHwHVLAMdckxCc63MFRD15mwPxMf1HoDUjBalEZsOIzAwbiJEd2fLlDHJHOueUZCQDfc5Usmt6GEdHIETYjXWuUx9mR-XNcz9wvpS0mJ33HFEBDcveBvxrmsYzPWmHdQl-X9mYQoJSWIuVP7dAYM2CjXZtzeWOB5G2ecXpZFhuexQ6fLMJJxID5uYZDzet0lSFhb2dz4koQxAlQ1oLyYFajzBAU8WDiJb7PdkMfu95Ft9lQlKs7z8WG86hOvkr2pzlPoFmr7auAUjoS81HbdfQhNL02bvYkAkPwiBgrNyTuRgAb7-Infn5W3k_IBoAYhiAcBkAcCqAeT2LECqAeU2LECqAeV2LECqAemvhuoB5bYG6gHqpuxAqgH_56xAqgH35-xAqgHrb6xAqgHv9OxAtgHANIIMhACMgiAgICAgICACDoUn9CAgICABIDAgICAoKiAAqiBgBBIvf3BOljZiKOojeOVA2AA-gsCCAGADAGqDQJKUOoNEwilsKOojeOVAxV_QcMGHVlOEiKIDgnQFQGAFwGyFwQYDFAB&num=1&cid=CAQSlAIAEQoqgTumVlLkKyxnk1GMVl4E_Y0yE513ZkdKqdmWHeFQyQYc55YcmelCgnDMrD3ozPAhLDxcGzkgKgAhB_l_CGeC7LnlYGO2ZryYZDVDI-efE4mvEEJfqjolIW4en5AaGszpv7UsIobj5w0DdnKI2sZlrJKSOpyOhXsRWEnSOMSMVLE69Uxnaf11rYlqn5hbvGk94Jv4OzQsPMdsmWafqJk_wuMqhXDlwLf1pFYFvE3M-hDuiCU5nTnAl2tA6ztbKxUsGzRuaABPEDdbYi73jY6JHt7638Ea7aVUTDrlk3O5XOAL9UtTGPBmADychrxpq5xp_HkaTvFVSJwiswGaOQV_WEZ4E4lNjo6tuJQEu1MB8FkYASAI&sig=AOD64_00wdW5ocMv151EB0OW8o12Q4UR9g&client=ca-pub-8934993653059501&adurl=https://exch.quantserve.com/r?&a=p-1RYxePXT9bCS2&labels=_qc.clk,_click.adserver.rtb,_click.rand.182672943&rtbip=103.229.8.9&rtbdata2=EAA6E2h0dHBzOi8vYW5hLXNsby5jb21aKGFHUHlGR2s3OFVSek42VVZaakx1RVc1azloZHpPNkFlYURQb3UyV0-AAa-8jVe6ARtDQUVTRU9XUEFMeW1pZnZSck9nQmRkc1A2SDTAAZC_BcgBpPGjmvgz2gEWT2Y1MVVCMDkyR1pudjNmdFRiSy1GUbACCMgCANACzuGG-_if98ypAegCqgLyAg4IhY03EPvE0tvZgsKGGvICDQiqAhDGyJrErefjgRX4AgCKAxYwLnB1Yi04OTM0OTkzNjUzMDU5NTAxmAMAqAMAsgMQJA8BAnh1AAAAAAAAAAAAALoDEglxQJdWxwBbDhHBroCn8InfkMIDEgmBSi6oIqz6CBHaqQ3amhPQrMgDyYDAggHYA6-8jVfiAw9wLTFSWXhlUFhUOWJDUzLqAwUI2AUQWvIDCDI0Ni0wMDAw-AMAgATiNIoEAjc3kgQSNTQ5NjQ0MzkzODQ4ODgyMzkwmgQSCWVAM4JRGUdWEbySHJzZFguSogQSCXFAl1bHAFsOEcGugKfwid-QqgQSCXFAl1bHAFsOEcGugKfwid-QuATQBdAEGfIEAkpQgAUBkAUBsAUAuAUAwAWvvI1XyAWa0KoE0gUGCAQQAhgC6AUFmgYUChIJZUAzglEZR1YRvJIcnNkWC5KgBgCoBs_wyye1Bma9nDm6BkYKAkpQEgIxNBgAIgRzZXlhKggyNDYtMDAwMDoSa2RkaSUyMGNvcnBvcmF0aW9uWgtrZGRpJTIwY29ycKIBCGtkZGkuY29tyQYhCAKkkGOzE_EGBigCpJBjsxP4BgWABwCKBxIJgUouqCKs-ggR2qkN2poT0KywB6DrswS4B5uB_QTYBwQ&rtb_id=CSEIAqSQY7MTEQYoAqSQY7MTGDzG1HoN6-2lAma7lxo&redirecturl3=&cachebuster=943791.0635076858";
+var ftKeyword_7986393="";
+var ftCustom_7986393="wbR_INuQeii8lRB_-OEsZdqwATzIg8wGCcU=";
+var ftSection_7986393="";
+var ftSegment_7986393="";
+var ftSegmentList_7986393=[];
+var ftRuleMatch_7986393="0";
+var ftTimestamp_7986393="1784614033";
+var ftGeoC2_7986393="jp";
+var ftGeoState_7986393="14";
+var ftGeoCity_7986393="yokohama";
+var ftISP_7986393="kddi corporation";
+var ftSpeed_7986393="broadband";
+var ftConnType_7986393="wifi";
+var ftDMA_7986393="392001";
+var ftLong_7986393="139.47";
+var ftLat_7986393="35.48";
+var ftPostal_7986393="246-0015";
+var ftTimeZone_7986393="+900";
+var ftMobileCarrier_7986393="";
+var ftImp7986393 = {};
+ftImp7986393.privacy = "x";
+ftImp7986393.guidAge = "58";
+ftImp7986393.impID = "D0AD8F8F-3990-CBCD-330D-271FD64A227B";
+ftImp7986393.duid = "FT:67181BA99F7BB8";
+
+ftImp7986393.ft_tpplid = "";
+ftImp7986393.ft_c = {};
+ftImp7986393.gdpr = "0";
+ftImp7986393.gdpr_consent = "";
+ftImp7986393.gdpr_pd = "";
+ftImp7986393.oob_consent = "";
+ftImp7986393.gdprStoredConsent = "";
+ftImp7986393.us_privacy = "";
+ftImp7986393.gpc = "";
+
+ftImp7986393.jsAppend = "1";
+var ftCreativeId_7986393 = "6294105";
+(function(){var tag=document.getElementById("ft_servedby_7986393")||function(s){return s[s.length-1]}(document.getElementsByTagName("script")),js=document.createElement("script");js.src="https://ajs-assets.ftstatic.com/ftUtils.js";js.id="ftscript_m7986393";js.setAttribute("name","ftscript_m7986393");tag.parentNode.insertBefore(js,tag)})();window.fTChecker=window.fTChecker||function(id){if(!id)return false;id=""+id;if(window.hasOwnProperty("ftUtils")){window["ft"+id]=Object.assign({},window.ftUtils.common);window["ft"+id].getBannerConfig(id)}else(function(id){window.setTimeout(function(){window.fTChecker(id)},50)})(id)};window.fTChecker("7986393");
+
