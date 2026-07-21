@@ -836,7 +836,7 @@ def clean_summary_text_for_display(text):
             
     return "\n".join(cleaned_lines).strip()
 
-def write_ai_results_to_excel(excel_path, target_date, ai_text):
+def write_ai_results_to_excel(excel_path, target_date, ai_text, has_diff_coins=False):
     d_obj = datetime.datetime.strptime(target_date, "%Y/%m/%d")
     clean_ai_summary = clean_summary_text_for_display(ai_text)
     
@@ -991,17 +991,26 @@ def write_ai_results_to_excel(excel_path, target_date, ai_text):
                                 df_v = int(diff_coins) if diff_coins is not None else -9999
                             except ValueError:
                                 df_v = -9999
-                            res = "〇" if (sc_v >= 4.5 and df_v >= 500) else "×"
+                            if has_diff_coins:
+                                res = "〇" if (sc_v >= 4.5 and df_v >= 500) else "×"
+                            else:
+                                res = "〇" if (sc_v >= 4.5) else "×"
                     else:
-                        try:
-                            df_v = int(diff_coins) if diff_coins is not None else -9999
-                        except ValueError:
-                            df_v = -9999
-                        try:
-                            gm_v = int(g_games) if g_games is not None else 0
-                        except ValueError:
-                            gm_v = 0
-                        res = "〇" if (df_v >= 1000 or gm_v >= 6000) else "×"
+                        if g_games is None or g_games == 0 or g_games == "":
+                            res = "-"
+                        else:
+                            try:
+                                df_v = int(diff_coins) if diff_coins is not None else -9999
+                            except ValueError:
+                                df_v = -9999
+                            try:
+                                gm_v = int(g_games) if g_games is not None else 0
+                            except ValueError:
+                                gm_v = 0
+                            if has_diff_coins:
+                                res = "〇" if (df_v >= 1000 or gm_v >= 6000) else "×"
+                            else:
+                                res = "〇" if (gm_v >= 6000) else "×"
                         
                     ai_ws.cell(r, 8, res)
                     rewritten_count += 1
@@ -1680,16 +1689,21 @@ def generate_html_dashboard(excel_path, store_name, has_diff_coins=False):
                 }}
                 
                 let finalResult = a.result;
-                if (isJuggler) {{
-                    if (a.games === null || a.games === undefined || a.games === "" || a.games === 0) {{
-                        finalResult = '-';
+                if (a.games === null || a.games === undefined || a.games === "" || a.games === 0) {{
+                    finalResult = '-';
+                }} else if (isJuggler) {{
+                    const scoreVal = a.score !== null && a.score !== undefined ? parseFloat(a.score) : 0;
+                    if (HAS_DIFF_COINS) {{
+                        finalResult = (!isNaN(scoreVal) && scoreVal >= 4.5 && diffVal !== null && diffVal >= 500) ? '〇' : '×';
                     }} else {{
-                        const scoreVal = a.score !== null && a.score !== undefined ? parseFloat(a.score) : 0;
-                        if (!isNaN(scoreVal) && scoreVal >= 4.5 && diffVal !== null && diffVal >= 500) {{
-                            finalResult = '〇';
-                        }} else {{
-                            finalResult = '×';
-                        }}
+                        finalResult = (!isNaN(scoreVal) && scoreVal >= 4.5) ? '〇' : '×';
+                    }}
+                }} else {{
+                    const gamesVal = parseInt(a.games || 0);
+                    if (HAS_DIFF_COINS) {{
+                        finalResult = ((diffVal !== null && diffVal >= 1000) || gamesVal >= 6000) ? '〇' : '×';
+                    }} else {{
+                        finalResult = (gamesVal >= 6000) ? '〇' : '×';
                     }}
                 }}
                 
@@ -2064,7 +2078,7 @@ def main():
     print(f"AI raw report saved to: {ref_out}")
     
     print("\nWriting AI recommendations back to Excel...")
-    write_ai_results_to_excel(excel_file, target_date, ai_text)
+    write_ai_results_to_excel(excel_file, target_date, ai_text, has_diff_coins=store_info.get('has_diff_coins', True))
     
     # 4. Generate the fully interactive HTML Dashboard for instant check
     generate_html_dashboard(excel_file, store_name, has_diff_coins=store_info.get('has_diff_coins', True))
