@@ -995,6 +995,21 @@ def write_ai_results_to_excel(excel_path, target_date, ai_text):
     wb.close()
     print("AI Analysis results written successfully into sheets.")
 
+    # 4. Save/Update rich text summary into JSON for HTML Dashboard
+    try:
+        rich_file = RICH_SUMMARIES_FILE
+        rich_data = {}
+        if os.path.exists(rich_file):
+            with open(rich_file, "r", encoding="utf-8") as f:
+                rich_data = json.load(f)
+        date_key = normalize_date_string(d_obj)
+        rich_data[date_key] = ai_text
+        with open(rich_file, "w", encoding="utf-8") as f:
+            json.dump(rich_data, f, ensure_ascii=False, indent=2)
+        print(f"Rich AI summary saved into JSON for dashboard: {date_key}")
+    except Exception as e:
+        print(f"Warning: Failed to update {RICH_SUMMARIES_FILE}: {e}")
+
 def generate_html_dashboard(excel_path, store_name, has_diff_coins=False):
     """
     Reads data from the Excel workbook and generates a fully interactive, lightweight
@@ -1464,15 +1479,35 @@ def generate_html_dashboard(excel_path, store_name, has_diff_coins=False):
             const filteredRecords = rawRecords.filter(r => r.date === targetDate);
             
             // 1. Update Stat boxes
-            const totalDiff = filteredRecords.reduce((acc, curr) => acc + curr.diff, 0);
-            const avgDiff = filteredRecords.length > 0 ? Math.round(totalDiff / filteredRecords.length) : 0;
-            const winningSlots = filteredRecords.filter(r => r.diff > 0).length;
-            const winRate = filteredRecords.length > 0 ? Math.round((winningSlots / filteredRecords.length) * 100) : 0;
+            if (HAS_DIFF_COINS) {{
+                document.getElementById('stat-card1-title').textContent = '本日総差枚';
+                document.getElementById('stat-card2-title').textContent = '本日平均差枚';
+                document.getElementById('stat-card3-title').textContent = '本日勝率';
+                
+                const totalDiff = filteredRecords.reduce((acc, curr) => acc + curr.diff, 0);
+                const avgDiff = filteredRecords.length > 0 ? Math.round(totalDiff / filteredRecords.length) : 0;
+                const winningSlots = filteredRecords.filter(r => r.diff > 0).length;
+                const winRate = filteredRecords.length > 0 ? Math.round((winningSlots / filteredRecords.length) * 100) : 0;
 
-            document.getElementById('stat-total-diff').textContent = totalDiff.toLocaleString() + ' 枚';
-            document.getElementById('stat-total-diff').className = 'text-xl md:text-2xl font-bold mt-2 ' + (totalDiff >= 0 ? 'text-emerald-400' : 'text-rose-400');
-            document.getElementById('stat-avg-diff').textContent = avgDiff.toLocaleString() + ' 枚';
-            document.getElementById('stat-win-rate').textContent = winRate + '%';
+                document.getElementById('stat-total-diff').textContent = totalDiff.toLocaleString() + ' 枚';
+                document.getElementById('stat-total-diff').className = 'text-xl md:text-2xl font-bold mt-2 ' + (totalDiff >= 0 ? 'text-emerald-400' : 'text-rose-400');
+                document.getElementById('stat-avg-diff').textContent = avgDiff.toLocaleString() + ' 枚';
+                document.getElementById('stat-win-rate').textContent = winRate + '%';
+            }} else {{
+                document.getElementById('stat-card1-title').textContent = '本日総稼働G数';
+                document.getElementById('stat-card2-title').textContent = '本日平均回転数';
+                document.getElementById('stat-card3-title').textContent = '高設定挙動(🌟4.5+)';
+                
+                const totalGames = filteredRecords.reduce((acc, curr) => acc + curr.games, 0);
+                const avgGames = filteredRecords.length > 0 ? Math.round(totalGames / filteredRecords.length) : 0;
+                const highScoreCount = filteredRecords.filter(r => r.score >= 4.5).length;
+
+                document.getElementById('stat-total-diff').textContent = totalGames.toLocaleString() + ' G';
+                document.getElementById('stat-total-diff').className = 'text-xl md:text-2xl font-bold mt-2 text-emerald-400';
+                document.getElementById('stat-avg-diff').textContent = avgGames.toLocaleString() + ' G';
+                document.getElementById('stat-win-rate').textContent = highScoreCount + ' 台';
+                document.getElementById('stat-win-rate').className = 'text-xl md:text-2xl font-bold mt-2 text-amber-400';
+            }}
 
             // 2. Load AI Summary text (Markdown render & keep ①, ②, ③ and ⑥, stripping ④ and ⑤!)
             const summaryObj = rawSummaries.find(s => s.date === targetDate);
@@ -1744,37 +1779,43 @@ def generate_html_dashboard(excel_path, store_name, has_diff_coins=False):
         }}
 
         function drawMachineChart(records) {{
+            const chartSectionTitle = document.getElementById('chart-section-title');
+            if (chartSectionTitle) {{
+                chartSectionTitle.textContent = HAS_DIFF_COINS ? '主要機種の差枚状況ランキング（平均値）' : '主要機種の平均稼働ゲーム数ランキング（G数）';
+            }}
+
             const machineData = {{}};
             records.forEach(r => {{
                 if (!machineData[r.name]) {{
-                    machineData[r.name] = {{ totalDiff: 0, count: 0 }};
+                    machineData[r.name] = {{ totalVal: 0, count: 0 }};
                 }}
-                machineData[r.name].totalDiff += r.diff;
+                machineData[r.name].totalVal += HAS_DIFF_COINS ? r.diff : r.games;
                 machineData[r.name].count += 1;
             }});
 
             const chartItems = Object.keys(machineData).map(k => ({{
                 name: k,
-                avgDiff: Math.round(machineData[k].totalDiff / machineData[k].count)
-            }})).sort((a, b) => b.avgDiff - a.avgDiff).slice(0, 10);
+                avgVal: Math.round(machineData[k].totalVal / machineData[k].count)
+            }})).sort((a, b) => b.avgVal - a.avgVal).slice(0, 10);
 
             const labels = chartItems.map(item => item.name);
-            const dataVals = chartItems.map(item => item.avgDiff);
+            const dataVals = chartItems.map(item => item.avgVal);
 
             const ctx = document.getElementById('chart-machines').getContext('2d');
             if (machineChart) {{
                 machineChart.destroy();
             }}
 
+            const labelName = HAS_DIFF_COINS ? '平均差枚数 (枚)' : '平均稼働 (G)';
             machineChart = new Chart(ctx, {{
                 type: 'bar',
                 data: {{
                     labels: labels,
                     datasets: [{{
-                        label: '平均差枚数 (枚)',
+                        label: labelName,
                         data: dataVals,
-                        backgroundColor: dataVals.map(v => v >= 0 ? 'rgba(52, 211, 153, 0.6)' : 'rgba(248, 113, 113, 0.6)'),
-                        borderColor: dataVals.map(v => v >= 0 ? 'rgba(52, 211, 153, 1)' : 'rgba(248, 113, 113, 1)'),
+                        backgroundColor: dataVals.map(v => HAS_DIFF_COINS ? (v >= 0 ? 'rgba(52, 211, 153, 0.6)' : 'rgba(248, 113, 113, 0.6)') : 'rgba(56, 189, 248, 0.6)'),
+                        borderColor: dataVals.map(v => HAS_DIFF_COINS ? (v >= 0 ? 'rgba(52, 211, 153, 1)' : 'rgba(248, 113, 113, 1)') : 'rgba(56, 189, 248, 1)'),
                         borderWidth: 1.5,
                         borderRadius: 6
                     }}]
@@ -1798,7 +1839,7 @@ def generate_html_dashboard(excel_path, store_name, has_diff_coins=False):
                                 size: 10
                             }},
                             formatter: function(value) {{
-                                return (value >= 0 ? '+' : '') + value;
+                                return HAS_DIFF_COINS ? ((value >= 0 ? '+' : '') + value) : (value.toLocaleString() + 'G');
                             }}
                         }}
                     }},
