@@ -521,11 +521,8 @@
                     finalResult = '-';
                 } else if (isJuggler) {
                     const scoreVal = a.score !== null && a.score !== undefined ? parseFloat(a.score) : 0;
-                    if (HAS_DIFF_COINS) {
-                        finalResult = (!isNaN(scoreVal) && scoreVal >= 4.5 && diffVal !== null && diffVal >= 500) ? '〇' : '×';
-                    } else {
-                        finalResult = (!isNaN(scoreVal) && scoreVal >= 4.5) ? '〇' : '×';
-                    }
+                    const gamesVal = parseInt(a.games || 0);
+                    finalResult = (!isNaN(scoreVal) && scoreVal >= 4.5 && gamesVal >= 6000) ? '〇' : '×';
                 } else {
                     const gamesVal = parseInt(a.games || 0);
                     if (HAS_DIFF_COINS) {

@@ -988,13 +988,10 @@ def write_ai_results_to_excel(excel_path, target_date, ai_text, has_diff_coins=F
                             except ValueError:
                                 sc_v = 0
                             try:
-                                df_v = int(diff_coins) if diff_coins is not None else -9999
+                                gm_v = int(g_games) if g_games is not None else 0
                             except ValueError:
-                                df_v = -9999
-                            if has_diff_coins:
-                                res = "〇" if (sc_v >= 4.5 and df_v >= 500) else "×"
-                            else:
-                                res = "〇" if (sc_v >= 4.5) else "×"
+                                gm_v = 0
+                            res = "〇" if (sc_v >= 4.5 and gm_v >= 6000) else "×"
                     else:
                         if g_games is None or g_games == 0 or g_games == "":
                             res = "-"
@@ -1693,11 +1690,8 @@ def generate_html_dashboard(excel_path, store_name, has_diff_coins=False):
                     finalResult = '-';
                 }} else if (isJuggler) {{
                     const scoreVal = a.score !== null && a.score !== undefined ? parseFloat(a.score) : 0;
-                    if (HAS_DIFF_COINS) {{
-                        finalResult = (!isNaN(scoreVal) && scoreVal >= 4.5 && diffVal !== null && diffVal >= 500) ? '〇' : '×';
-                    }} else {{
-                        finalResult = (!isNaN(scoreVal) && scoreVal >= 4.5) ? '〇' : '×';
-                    }}
+                    const gamesVal = parseInt(a.games || 0);
+                    finalResult = (!isNaN(scoreVal) && scoreVal >= 4.5 && gamesVal >= 6000) ? '〇' : '×';
                 }} else {{
                     const gamesVal = parseInt(a.games || 0);
                     if (HAS_DIFF_COINS) {{
