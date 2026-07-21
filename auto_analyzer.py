@@ -857,7 +857,8 @@ def write_ai_results_to_excel(excel_path, target_date, ai_text):
                 date_str = cells[0]
                 machine_name = cells[1]
                 try:
-                    machine_num = int(cells[2])
+                    num_str = re.sub(r'[^\d]', '', str(cells[2]))
+                    machine_num = int(num_str) if num_str else cells[2]
                 except ValueError:
                     machine_num = cells[2]
                 reason = cells[3]
@@ -964,7 +965,11 @@ def write_ai_results_to_excel(excel_path, target_date, ai_text):
         if date_val is not None and mach_val is not None:
             date_str = normalize_date_string(date_val)
             try:
-                m_num = int(str(mach_val).strip())
+                num_str = re.sub(r'[^\d]', '', str(mach_val))
+                if not num_str:
+                    continue
+                m_num = int(num_str)
+                ai_ws.cell(r, 3, m_num)  # Clean cell value in Excel
                 key = (date_str, m_num)
                 if key in accumulated_db:
                     g_games, diff_coins, setting_score = accumulated_db[key]
