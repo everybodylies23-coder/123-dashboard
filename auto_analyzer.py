@@ -97,6 +97,38 @@ def normalize_date_string(date_val):
         return f"{match.group(1)}/{int(match.group(2)):02d}/{int(match.group(3)):02d}"
     return date_str
 
+def extract_excel_specific_days_setting(excel_path):
+    """
+    Extracts custom specific day end-digit settings from 【分析】高設定履歴DB Sheet Row 2.
+    Example output: "末尾1, ゾロ目"
+    """
+    try:
+        if not excel_path or not os.path.exists(excel_path):
+            return "末尾1"
+        wb = openpyxl.load_workbook(excel_path, data_only=True)
+        if "【分析】高設定履歴DB" in wb.sheetnames:
+            ws = wb["【分析】高設定履歴DB"]
+            for r in range(1, 10):
+                c1_val = str(ws.cell(r, 1).value or '')
+                if "特定日末尾" in c1_val or "特定日" in c1_val:
+                    settings = []
+                    for col in range(2, ws.max_column + 1):
+                        val = ws.cell(r, col).value
+                        if val is not None and str(val).strip() != '':
+                            s_str = str(val).strip()
+                            if s_str.isdigit():
+                                settings.append(f"末尾{s_str}")
+                            else:
+                                settings.append(s_str)
+                    wb.close()
+                    if settings:
+                        return ", ".join(settings)
+        wb.close()
+    except Exception as e:
+        print(f"Notice: Could not read specific days setting from Excel: {e}")
+    return "末尾1"
+
+
 def load_config():
     if not os.path.exists(CONFIG_FILE):
         print(f"Error: {CONFIG_FILE} not found. Please create it first.")
@@ -604,7 +636,12 @@ def prepare_ai_context(excel_path, target_date):
     return context_text
 
 
-def run_gemini_analysis(api_key, context, target_date):
+def run_gemini_analysis(api_key, context, target_date, excel_file=None):
+    if excel_file and os.path.exists(excel_file):
+        specific_days_rule = extract_excel_specific_days_setting(excel_file)
+    else:
+        specific_days_rule = "末尾1"
+
     import google.generativeai as genai
     genai.configure(api_key=api_key)
     
@@ -1906,7 +1943,7 @@ def main():
     context = prepare_ai_context(excel_file, target_date)
     
     print("\nRunning Gemini AI analysis...")
-    ai_text = run_gemini_analysis(api_key, context, target_date)
+    ai_text = run_gemini_analysis(api_key, context, target_date, excel_file)
     
     ref_out = os.path.join("data_input", f"{filename_wo_ext}_ai_report.md")
     with open(ref_out, "w", encoding="utf-8") as f:
