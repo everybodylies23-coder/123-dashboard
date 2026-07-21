@@ -625,6 +625,14 @@ def run_gemini_analysis(api_key, context, target_date):
 一般ユーザー向けの解説は不要です。期待値を最大化するための分析のみを行ってください。
 
 ---
+
+【最重要指示】：分析対象店舗（123店）は毎日営業データを公開するデイルーホールです。
+次回予測日や狙い目日付には、特定イベント日（例：4月6日等）を絶対に記載せず、必ず分析対象日（本日：{target_date}）の【翌日（明日）：{tomorrow_date}】を明記し、明日の狙い目台10台を選定してください。
+
+
+【最重要指示】：分析対象店舗（123店）は毎日営業データを公開するデイルーホールです。
+次回予測日や狙い目日付には、特定イベント日（例：4月6日等）を絶対に記載せず、必ず分析対象日（本日：{target_date}）の【翌日（明日）：{tomorrow_date}】を明記し、明日の狙い目台10台を選定してください。
+
 【分析対象店舗の特性】
 店舗名：トワーズ大和深見店
 特徴：
@@ -699,7 +707,7 @@ def run_gemini_analysis(api_key, context, target_date):
 ① 【AI】営業評価と店長の心理総括
 【次回イベントの参戦評価：行ける（勝負すべき日）】
 （※選択肢：「行ける（勝負すべき日）」「狙い目だけ打ちに行く（ピンポイント狙い）」「行く価値無し（見送り推奨）」）
-次回イベント予測日：YYYY/MM/DD（イベント特徴：例 月日ゾロ目の日 / 末尾6の日 / 日ゾロ目の日）
+次回予測日（明日：{tomorrow_date}）：YYYY/MM/DD（イベント特徴：例 月日ゾロ目の日 / 末尾6の日 / 日ゾロ目の日）
 
 本日の営業結果を踏まえ、店長の意図（還元・回収・フェイク・スライド・末尾寄せ）を簡潔に分析してください。
 
@@ -1681,9 +1689,15 @@ def generate_html_dashboard(excel_path, store_name, has_diff_coins=False):
             }});
         }}
 
-        function calculateOverallAIAccuracy() {{
+                                                        function calculateOverallAIAccuracy() {{
             const deduped = deduplicatePredictions(rawPredictions);
-            const evaluated = deduped.filter(p => p.result === '〇' || p.result === '×');
+            const evaluated = deduped.filter(p => {{
+                if (p.result !== '〇' && p.result !== '×') return false;
+                if (!p.reason || p.reason.includes('テスト')) return false;
+                const rStr = p.reason.toUpperCase();
+                return rStr.includes('Sランク') || rStr.includes('Aランク') || rStr.includes('推奨S') || rStr.includes('推奨A') || rStr.includes('【S') || rStr.includes('【A');
+            }});
+            
             if (evaluated.length === 0) {{
                 document.getElementById('stat-ai-accuracy').textContent = '- %';
                 return;
