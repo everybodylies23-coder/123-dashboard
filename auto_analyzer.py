@@ -1515,22 +1515,38 @@ def generate_html_dashboard(excel_path, store_name, has_diff_coins=False):
                     safeSetText('stat-win-rate', highScoreCount + ' 台', 'text-xl md:text-2xl font-bold mt-2 text-amber-400');
                 }}
 
-                // Update 4th Stat card (Daily AI Accuracy for selected targetDate)
-                const dedupedForDate = deduplicatePredictions(rawPredictions).filter(p => p.date === targetDate && (p.result === '〇' || p.result === '×'));
-                if (dedupedForDate.length > 0) {{
-                    const wins = dedupedForDate.filter(p => p.result === '〇').length;
-                    const accuracy = Math.round((wins / dedupedForDate.length) * 100);
-                    safeSetText('stat-card4-title', 'AI予測 勝率 (' + targetDate + ')');
-                    safeSetText('stat-ai-accuracy', accuracy + '% (' + wins + '/' + dedupedForDate.length + '台)', 'text-xl md:text-2xl font-bold mt-2 ' + (accuracy >= 50 ? 'text-emerald-400' : (accuracy > 0 ? 'text-amber-400' : 'text-rose-400')));
+                // Update 4th Stat card (Cumulative Total AI Accuracy up to targetDate)
+                const dedupedPreds = deduplicatePredictions(rawPredictions);
+                const cumulativePreds = dedupedPreds.filter(p => p.date <= targetDate);
+                if (cumulativePreds.length > 0) {{
+                    const totalPredsCount = cumulativePreds.length;
+                    const wins = cumulativePreds.filter(p => p.result === '〇').length;
+                    const accuracyRaw = (wins / totalPredsCount) * 100;
+                    const accuracyStr = (accuracyRaw % 1 === 0) ? accuracyRaw.toFixed(0) : accuracyRaw.toFixed(1);
+                    safeSetText('stat-card4-title', 'AI予測 累計勝率 (〜' + targetDate + ')');
+                    safeSetText('stat-ai-accuracy', accuracyStr + '% (' + wins + '/' + totalPredsCount + '台)', 'text-xl md:text-2xl font-bold mt-2 ' + (accuracyRaw >= 50 ? 'text-emerald-400' : (accuracyRaw > 0 ? 'text-amber-400' : 'text-rose-400')));
                 }} else {{
-                    safeSetText('stat-card4-title', 'AI予測 勝率');
-                    safeSetText('stat-ai-accuracy', '- % (評価前)', 'text-xl md:text-2xl font-bold mt-2 text-slate-400');
+                    safeSetText('stat-card4-title', 'AI予測 累計勝率');
+                    safeSetText('stat-ai-accuracy', '- %', 'text-xl md:text-2xl font-bold mt-2 text-slate-400');
                 }}
 
-            // 2. Load AI Summary text (Full Markdown render with sections ④ & ⑤ restored!)
+            // 2. Load AI Summary text (Markdown render & keep ①, ②, ③ and ⑥, stripping ④ and ⑤ to prevent duplication with recommendation section below)
             const summaryObj = rawSummaries.find(s => s.date === targetDate);
             if (summaryObj && summaryObj.text) {{
-                document.getElementById('ai-summary-text').innerHTML = marked.parse(summaryObj.text);
+                let cleanText = summaryObj.text;
+                // If text contains ④ and ⑥, strip out ④ and ⑤ between them, keeping ①, ②, ③ and ⑥
+                const index4 = cleanText.search(/(④|4\\.|AI独自の次回推奨狙い台)/);
+                const index6 = cleanText.search(/(⑥|6\\.|最も自信があるTOP)/);
+                
+                if (index4 !== -1 && index6 !== -1 && index6 > index4) {{
+                    const part1 = cleanText.substring(0, index4).trim();
+                    const part2 = cleanText.substring(index6).trim();
+                    cleanText = part1 + String.fromCharCode(10, 10) + part2;
+                }} else if (index4 !== -1) {{
+                    cleanText = cleanText.substring(0, index4).trim();
+                }}
+                
+                document.getElementById('ai-summary-text').innerHTML = marked.parse(cleanText);
             }} else {{
                 document.getElementById('ai-summary-text').innerHTML = '<p class="text-slate-500">この日のAI営業総括データはありません。</p>';
             }}
