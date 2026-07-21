@@ -1178,7 +1178,7 @@ def generate_html_dashboard(excel_path, store_name, has_diff_coins=False):
                 <p id="stat-avg-diff" class="text-xl md:text-2xl font-bold mt-2 text-white">0 枚</p>
             </div>
             <div class="p-4 md:p-6 glass rounded-2xl text-center md:text-left">
-                <h3 class="text-slate-400 text-xs font-semibold uppercase tracking-wider">本日勝率</h3>
+                <h3 class="text-slate-400 text-xs font-semibold uppercase tracking-wider" id="stat-card3-title">本日勝率</h3>
                 <p id="stat-win-rate" class="text-xl md:text-2xl font-bold mt-2 text-white">0%</p>
             </div>
             <div class="p-4 md:p-6 glass rounded-2xl text-center md:text-left">
@@ -1214,7 +1214,7 @@ def generate_html_dashboard(excel_path, store_name, has_diff_coins=False):
         <section class="p-6 glass rounded-2xl space-y-4">
             <div class="flex items-center gap-2">
                 <span class="p-1.5 bg-cyan-500/10 text-cyan-400 rounded-lg text-sm">🎯</span>
-                <h2 class="text-xl font-bold">次回（明日）のAI推奨台</h2>
+                <h2 class="text-xl font-bold" id="next-event-title">次回（明日）のAI推奨台</h2>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1475,39 +1475,45 @@ def generate_html_dashboard(excel_path, store_name, has_diff_coins=False):
             return Object.values(uniqueMap);
         }}
 
-        function updateDashboardForDate(targetDate) {{
-            const filteredRecords = rawRecords.filter(r => r.date === targetDate);
-            
-            // 1. Update Stat boxes
-            if (HAS_DIFF_COINS) {{
-                document.getElementById('stat-card1-title').textContent = '本日総差枚';
-                document.getElementById('stat-card2-title').textContent = '本日平均差枚';
-                document.getElementById('stat-card3-title').textContent = '本日勝率';
-                
-                const totalDiff = filteredRecords.reduce((acc, curr) => acc + curr.diff, 0);
-                const avgDiff = filteredRecords.length > 0 ? Math.round(totalDiff / filteredRecords.length) : 0;
-                const winningSlots = filteredRecords.filter(r => r.diff > 0).length;
-                const winRate = filteredRecords.length > 0 ? Math.round((winningSlots / filteredRecords.length) * 100) : 0;
-
-                document.getElementById('stat-total-diff').textContent = totalDiff.toLocaleString() + ' 枚';
-                document.getElementById('stat-total-diff').className = 'text-xl md:text-2xl font-bold mt-2 ' + (totalDiff >= 0 ? 'text-emerald-400' : 'text-rose-400');
-                document.getElementById('stat-avg-diff').textContent = avgDiff.toLocaleString() + ' 枚';
-                document.getElementById('stat-win-rate').textContent = winRate + '%';
-            }} else {{
-                document.getElementById('stat-card1-title').textContent = '本日総稼働G数';
-                document.getElementById('stat-card2-title').textContent = '本日平均回転数';
-                document.getElementById('stat-card3-title').textContent = '高設定挙動(🌟4.5+)';
-                
-                const totalGames = filteredRecords.reduce((acc, curr) => acc + curr.games, 0);
-                const avgGames = filteredRecords.length > 0 ? Math.round(totalGames / filteredRecords.length) : 0;
-                const highScoreCount = filteredRecords.filter(r => r.score >= 4.5).length;
-
-                document.getElementById('stat-total-diff').textContent = totalGames.toLocaleString() + ' G';
-                document.getElementById('stat-total-diff').className = 'text-xl md:text-2xl font-bold mt-2 text-emerald-400';
-                document.getElementById('stat-avg-diff').textContent = avgGames.toLocaleString() + ' G';
-                document.getElementById('stat-win-rate').textContent = highScoreCount + ' 台';
-                document.getElementById('stat-win-rate').className = 'text-xl md:text-2xl font-bold mt-2 text-amber-400';
+        function safeSetText(id, text, className) {{
+            const el = document.getElementById(id);
+            if (el) {{
+                if (text !== undefined) el.textContent = text;
+                if (className !== undefined) el.className = className;
             }}
+        }}
+
+        function updateDashboardForDate(targetDate) {{
+            try {{
+                const filteredRecords = rawRecords.filter(r => r.date === targetDate);
+                
+                // 1. Update Stat boxes
+                if (HAS_DIFF_COINS) {{
+                    safeSetText('stat-card1-title', '本日総差枚');
+                    safeSetText('stat-card2-title', '本日平均差枚');
+                    safeSetText('stat-card3-title', '本日勝率');
+                    
+                    const totalDiff = filteredRecords.reduce((acc, curr) => acc + curr.diff, 0);
+                    const avgDiff = filteredRecords.length > 0 ? Math.round(totalDiff / filteredRecords.length) : 0;
+                    const winningSlots = filteredRecords.filter(r => r.diff > 0).length;
+                    const winRate = filteredRecords.length > 0 ? Math.round((winningSlots / filteredRecords.length) * 100) : 0;
+
+                    safeSetText('stat-total-diff', totalDiff.toLocaleString() + ' 枚', 'text-xl md:text-2xl font-bold mt-2 ' + (totalDiff >= 0 ? 'text-emerald-400' : 'text-rose-400'));
+                    safeSetText('stat-avg-diff', avgDiff.toLocaleString() + ' 枚');
+                    safeSetText('stat-win-rate', winRate + '%');
+                }} else {{
+                    safeSetText('stat-card1-title', '本日総稼働G数');
+                    safeSetText('stat-card2-title', '本日平均回転数');
+                    safeSetText('stat-card3-title', '高設定挙動(🌟4.5+)');
+                    
+                    const totalGames = filteredRecords.reduce((acc, curr) => acc + curr.games, 0);
+                    const avgGames = filteredRecords.length > 0 ? Math.round(totalGames / filteredRecords.length) : 0;
+                    const highScoreCount = filteredRecords.filter(r => r.score >= 4.5).length;
+
+                    safeSetText('stat-total-diff', totalGames.toLocaleString() + ' G', 'text-xl md:text-2xl font-bold mt-2 text-emerald-400');
+                    safeSetText('stat-avg-diff', avgGames.toLocaleString() + ' G');
+                    safeSetText('stat-win-rate', highScoreCount + ' 台', 'text-xl md:text-2xl font-bold mt-2 text-amber-400');
+                }}
 
             // 2. Load AI Summary text (Markdown render & keep ①, ②, ③ and ⑥, stripping ④ and ⑤!)
             const summaryObj = rawSummaries.find(s => s.date === targetDate);
@@ -1731,6 +1737,9 @@ def generate_html_dashboard(excel_path, store_name, has_diff_coins=False):
 
             // 6. Draw Chart
             drawMachineChart(filteredRecords);
+            }} catch (e) {{
+                console.error("Error in updateDashboardForDate:", e);
+            }}
         }}
 
         function populateRawTable(data) {{
