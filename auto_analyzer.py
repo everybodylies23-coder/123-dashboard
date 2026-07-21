@@ -646,10 +646,10 @@ def run_gemini_analysis(api_key, context, target_date, excel_file=None):
     genai.configure(api_key=api_key)
     
     models_to_try = [
-        'gemini-3.1-pro-preview',
+        'gemini-2.0-flash',
         'gemini-3.5-flash',
         'gemini-3.1-flash-lite',
-        'gemini-2.0-flash'
+        'gemini-3.1-pro-preview'
     ]
     
     d_obj = datetime.datetime.strptime(target_date, "%Y/%m/%d")
@@ -775,27 +775,70 @@ def run_gemini_analysis(api_key, context, target_date, excel_file=None):
 """
     
     for model_name in models_to_try:
-        try:
-            print(f"Sending prompt to Gemini API using model: {model_name}... (This may take a moment)")
-            model = genai.GenerativeModel(model_name)
-            response = model.generate_content(prompt)
-            return response.text
-        except Exception as e:
-            err_str = str(e).lower()
-            is_skippable = (
-                any(x in err_str for x in ["429", "quota", "exhausted", "limit"]) or
-                any(x in err_str for x in ["404", "not found", "no longer available", "deprecated"])
-            )
-            if is_skippable:
-                print(f"Notice: Model {model_name} is rate-limited, deprecated or unavailable. Automatically trying next model...")
-                continue
-            else:
-                raise e
+        print(f"Sending prompt to Gemini API using model: {model_name}... (This may take a moment)")
+        model = genai.GenerativeModel(model_name)
+        
+        # Robust retry loop for each model (handles 504 DeadlineExceeded, timeouts, and rate limits gracefully)
+        for attempt in range(1, 4):
+            try:
+                response = model.generate_content(
+                    prompt,
+                    request_options={"timeout": 60.0}
+                )
+                return response.text
+            except Exception as e:
+                err_str = str(e).lower()
+                is_timeout_or_busy = any(x in err_str for x in ["504", "deadline", "timeout", "503", "500", "unavailable", "temporarily", "expired"])
+                is_quota_or_deprecated = (
+                    any(x in err_str for x in ["429", "quota", "exhausted", "limit"]) or
+                    any(x in err_str for x in ["404", "not found", "no longer available", "deprecated"])
+                )
                 
-    raise Exception("Error: All available Gemini models failed due to quota limits. Please try again after a few minutes.")
+                if is_timeout_or_busy:
+                    print(f"Notice: Network timeout/delay on model {model_name} (Attempt {attempt}/3: {e}). Retrying in 5 seconds...")
+                    time.sleep(5)
+                    continue
+                elif is_quota_or_deprecated:
+                    print(f"Notice: Model {model_name} is rate-limited, deprecated or unavailable. Automatically trying next model...")
+                    break
+                else:
+                    if attempt < 3:
+                        print(f"Notice: Error on model {model_name} (Attempt {attempt}/3: {e}). Retrying in 5 seconds...")
+                        time.sleep(5)
+                    else:
+                        print(f"Warning: Model {model_name} failed after 3 attempts. Moving to next model...")
+                        break
+                        
+    raise Exception("Error: All available Gemini models failed or timed out. Please check network connection and try again.")
+
+def clean_summary_text_for_display(text):
+    """
+    Strips out sections ④ (AI独自の次回推奨狙い台) and ⑤ (予想・答え合わせ コピペ用テーブル)
+    from the raw AI markdown response to prevent text duplication with the dedicated
+    recommendation tables rendered below it in the dashboard.
+    """
+    if not text:
+        return ""
+    lines = text.splitlines()
+    cleaned_lines = []
+    skip = False
+    for line in lines:
+        stripped = line.strip()
+        if re.search(r'^(#+\s*)?(④|4[\.\s]|【AI】独自の次回推奨|AI独自の次回推奨|次回推奨狙い台)', stripped):
+            skip = True
+        elif re.search(r'^(#+\s*)?(⑤|5[\.\s]|【AI】予想|コピペ用テーブル)', stripped):
+            skip = True
+        elif re.search(r'^(#+\s*)?(⑥|6[\.\s]|本日.*で最も自信がある|最も自信がある|最重視|TOP\s*3)', stripped):
+            skip = False
+            
+        if not skip:
+            cleaned_lines.append(line)
+            
+    return "\n".join(cleaned_lines).strip()
 
 def write_ai_results_to_excel(excel_path, target_date, ai_text):
     d_obj = datetime.datetime.strptime(target_date, "%Y/%m/%d")
+    clean_ai_summary = clean_summary_text_for_display(ai_text)
     
     wb = openpyxl.load_workbook(excel_path, data_only=False)
     
@@ -989,7 +1032,7 @@ def write_ai_results_to_excel(excel_path, target_date, ai_text):
     target_sum_row = found_date_row if found_date_row else last_sum_r + 1
     dt_c = summary_ws.cell(target_sum_row, 5, d_obj)
     dt_c.number_format = 'yyyy/mm/dd'
-    summary_ws.cell(target_sum_row, 6, ai_text)
+    summary_ws.cell(target_sum_row, 6, clean_ai_summary)
     
     safe_save_workbook(wb, excel_path)
     wb.close()
@@ -1003,7 +1046,7 @@ def write_ai_results_to_excel(excel_path, target_date, ai_text):
             with open(rich_file, "r", encoding="utf-8") as f:
                 rich_data = json.load(f)
         date_key = normalize_date_string(d_obj)
-        rich_data[date_key] = ai_text
+        rich_data[date_key] = clean_ai_summary
         with open(rich_file, "w", encoding="utf-8") as f:
             json.dump(rich_data, f, ensure_ascii=False, indent=2)
         print(f"Rich AI summary saved into JSON for dashboard: {date_key}")
