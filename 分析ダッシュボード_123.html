@@ -400,18 +400,30 @@
                     safeSetText('stat-win-rate', highScoreCount + ' 台', 'text-xl md:text-2xl font-bold mt-2 text-amber-400');
                 }
 
-                // Update 4th Stat card (Cumulative Total AI Accuracy up to targetDate)
+                // Update 4th Stat card (Cumulative Total AI Accuracy up to targetDate - S/A Ranks Only!)
+                function isSARank(reasonStr) {
+                    if (!reasonStr) return false;
+                    const s = reasonStr.toUpperCase();
+                    const isS = s.includes('Sランク') || s.includes('推奨S') || s.includes('【S') || s.includes('[S');
+                    const isA = s.includes('Aランク') || s.includes('推奨A') || s.includes('【A') || s.includes('[A');
+                    const isB = s.includes('Bランク') || s.includes('推奨B') || s.includes('【B') || s.includes('[B');
+                    if (isB && !isS && !isA) return false;
+                    return isS || isA;
+                }
+
                 const dedupedPreds = deduplicatePredictions(rawPredictions);
-                const cumulativePreds = dedupedPreds.filter(p => p.date <= targetDate);
-                if (cumulativePreds.length > 0) {
-                    const totalPredsCount = cumulativePreds.length;
-                    const wins = cumulativePreds.filter(p => p.result === '〇').length;
+                const cumulativePreds = dedupedPreds.filter(p => p.date <= targetDate && (p.result === '〇' || p.result === '×'));
+                const saPreds = cumulativePreds.filter(p => isSARank(p.reason));
+                
+                if (saPreds.length > 0) {
+                    const totalPredsCount = saPreds.length;
+                    const wins = saPreds.filter(p => p.result === '〇').length;
                     const accuracyRaw = (wins / totalPredsCount) * 100;
                     const accuracyStr = (accuracyRaw % 1 === 0) ? accuracyRaw.toFixed(0) : accuracyRaw.toFixed(1);
-                    safeSetText('stat-card4-title', 'AI予測 累計勝率 (〜' + targetDate + ')');
+                    safeSetText('stat-card4-title', 'AI予測 累計勝率 (S・A枠)');
                     safeSetText('stat-ai-accuracy', accuracyStr + '% (' + wins + '/' + totalPredsCount + '台)', 'text-xl md:text-2xl font-bold mt-2 ' + (accuracyRaw >= 50 ? 'text-emerald-400' : (accuracyRaw > 0 ? 'text-amber-400' : 'text-rose-400')));
                 } else {
-                    safeSetText('stat-card4-title', 'AI予測 累計勝率');
+                    safeSetText('stat-card4-title', 'AI予測 累計勝率 (S・A枠)');
                     safeSetText('stat-ai-accuracy', '- %', 'text-xl md:text-2xl font-bold mt-2 text-slate-400');
                 }
 
